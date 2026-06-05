@@ -1,182 +1,134 @@
-# 🚗 区块链汽车供应链平台
+区块链汽车供应链平台
+MIT License Fabric 2.5 React 18 Node.js 18
 
-基于 Hyperledger Fabric 的区块链汽车供应链应收账款管理平台
+基于 Hyperledger Fabric 的汽车行业供应链金融平台，实现应收账款的透明化、可追溯管理。
+本仓库为区块链课程小组作业项目。
 
-## 📋 功能特性
+🚀 项目概述
+本平台允许供应商、采购商和金融机构协作管理发票、确权、转让债权、申请融资，并在不可篡改的账本上跟踪应收账款的全生命周期。
 
-- **账款列表展示**：显示全部应收账款，带状态颜色标签
-- **创建账款**：填写表单创建新的应收账款记录
-- **确权操作**：采购商确认应收账款
-- **转让操作**：供应商转让应收账款
-- **融资申请**：基于应收账款申请融资
-- **银行审批**：银行审批融资申请
-- **历史溯源**：查看账款的全部交易记录和状态变更
+主要功能：
 
-## 📊 状态流转
-
-```
-未确权 → 已确权 → 已转让 → 融资申请中 → 已融资/融资失败
-```
-
-## 🛠️ 技术栈
-
-### 前端
-- React 18
-- Axios（HTTP请求）
-- Inline Styles（样式）
-
-### 后端
-- Node.js / Express
-- Hyperledger Fabric Gateway SDK
-- CORS 跨域支持
-
-### 区块链
-- Hyperledger Fabric 2.5
-- CouchDB 状态数据库
-
-## 📁 项目结构
-
-```
-区块链汽车平台/
-├── backend/                    # 后端服务
-│   ├── controllers/           # 控制器
-│   │   └── receivableController.js
-│   ├── routes/                # 路由
-│   │   └── receivables.js
-│   ├── connection.json        # Fabric连接配置
-│   ├── .env                   # 环境变量
-│   ├── package.json
-│   └── server.js              # 主入口
-├── frontend/                  # 前端应用
-│   ├── public/
-│   │   └── index.html
-│   ├── src/
-│   │   ├── App.js            # 主组件
-│   │   └── index.js
-│   └── package.json
-├── docker-compose.yaml        # Docker部署配置
-├── start.sh                   # 启动脚本
-└── README.md
-```
-
-## 🚀 快速开始
-
-### 1. 环境要求
-
-- Docker >= 20.10
-- Docker Compose >= 2.0
-- Node.js >= 16.0
-- npm >= 8.0
-
-### 2. 启动区块链网络
-
-```bash
-# 赋予启动脚本执行权限
-chmod +x start.sh
-
-# 启动区块链网络
-./start.sh
-```
-
-### 3. 安装依赖
-
-```bash
-# 安装后端依赖
+✅ 创建应收账款
+✅ 确权（采购商确认）
+✅ 转让债权给第三方
+✅ 申请融资（供应商/新持有人）
+✅ 审批融资（银行）
+✅ 溯源每笔应收账款的完整历史
+✅ 仪表盘：汇总卡片 + 各状态金额分布柱状图
+🧱 系统架构
++-------------+       REST API       +-------------+       gRPC       +-------------------+
+|   React     | <------------------> |  Node.js    | <--------------> | Hyperledger Fabric|
+|   前端      |                       |  后端       |                   | (排序节点, 对等节点,|
++-------------+                       +-------------+                   |  CouchDB)         |
+                                             |                          +-------------------+
+                                             | (可选模拟模式)     
+                                             v                          
+                                      +-------------+                  
+                                      |  data.json  |                  
+                                      +-------------+                  
+    
+前端：React 18 + Recharts + Axios
+后端：Node.js 18 + Express + Fabric Gateway SDK
+区块链：Hyperledger Fabric 2.5 (etcdraft 共识) + CouchDB 状态数据库
+持久化：模拟模式使用本地 data.json，生产模式使用账本
+📦 技术栈
+层	技术
+区块链	Hyperledger Fabric 2.5, Go 链码, CouchDB, Docker Compose
+后端	Node.js, Express, @hyperledger/fabric-gateway, nodemon
+前端	React, Recharts, Axios, CSS-in-JS
+部署	VMware Ubuntu 22.04, Docker, systemd, shell 脚本
+协作	GitHub, Git
+🛠️ 安装与运行
+环境要求
+Windows / Linux / macOS（开发在 Windows + VMware Ubuntu）
+Docker 和 Docker Compose（用于 Fabric 网络）
+Node.js (v18) 和 npm
+Git
+步骤
+克隆仓库
+git clone https://github.com/你的组织名/仓库名.git
+cd 仓库名
+启动 Fabric 网络（在 Ubuntu 虚拟机中）
+cd /path/to/project
+docker compose up -d
+项目已包含预生成的 organizations/ 证书目录。如果缺失，请运行 cryptogen generate 和 configtxgen（参考文档）。
+安装后端依赖并运行
 cd backend
 npm install
-
-# 安装前端依赖
+npm start
+后端启动在 http://localhost:5000。
+安装前端依赖并运行
 cd ../frontend
 npm install
-```
-
-### 4. 启动服务
-
-```bash
-# 启动后端服务（终端1）
-cd backend
 npm start
+前端启动在 http://localhost:3000。
+访问应用
+浏览器打开 http://localhost:3000（如在虚拟机中运行，则使用 http://虚拟机IP:3000）。
+📚 后端 API 接口
+方法	端点	说明	链码方法
+GET	/api/receivables	查询所有账款	QueryAll
+POST	/api/receivables	创建账款	CreateReceivable
+POST	/api/receivables/:id/confirm	确权	ConfirmReceivable
+POST	/api/receivables/:id/transfer	转让债权	TransferReceivable
+POST	/api/receivables/:id/finance	申请融资	ApplyFinance
+POST	/api/receivables/:id/approve	审批融资	ApproveFinance
+GET	/api/receivables/:id/history	获取历史记录	GetHistory
+模拟模式：当 Fabric 不可用时，在 .env 中设置 USE_MOCK=true，后端将读写 data.json 文件。
+🎨 前端界面预览
+仪表盘：三个汇总卡片（应收账款总数、已确权个数、已融资个数）
+柱状图：各状态应收账款金额分布（未确权、已确权、已转让、已融资、已结清）
+侧边栏导航：收款列表、创建收款、各状态金额分布
+收款列表：完整表格 + 状态标签 + 动态操作按钮（依状态显示不同按钮）
+创建表单：新增发票
+历史弹窗：查看应收账款的区块链交易历史
+👥 团队分工
+角色	成员	主要职责
+组长 / 区块链负责人	你	Fabric 网络搭建、链码开发、项目协调
+后端开发	组员B	Express 服务器、Fabric Gateway 集成、全部 API 端点
+前端开发（核心）	组员C	React 核心组件、状态管理、API 集成
+前端样式与图表	组员D	CSS 布局、响应式设计、Recharts 图表集成
+链码测试 & 历史接口	组员A	链码单元测试、/api/history 接口实现
+运维与部署	组员E	VMware 环境配置、Docker 脚本、共享文件夹自动挂载、自动化脚本
+测试与质量保证	组员F	单元/集成测试、Bug 跟踪、手工端到端验证
+文档与答辩	组员G	架构图、API 文档、用户手册、PPT 制作
+📁 项目结构
+.
+├── backend/
+│   ├── config/
+│   │   └── fabric.js            # Fabric 连接配置
+│   ├── controllers/
+│   │   └── receivableController.js
+│   ├── server.js
+│   ├── package.json
+│   └── data.json                （可选，模拟模式使用）
+├── frontend/
+│   ├── src/
+│   │   ├── App.js
+│   │   └── ...
+│   ├── public/
+│   └── package.json
+├── chaincode/                   # 链码源代码
+├── organizations/               # 生成的证书材料
+├── channel-artifacts/           # 创世区块和通道配置
+├── docker-compose.yaml
+├── cryptogen-config.yaml
+├── configtx.yaml
+├── start.sh
+└── README.md
+    
+🔧 环境变量（后端）
+在 backend/ 目录下创建 .env 文件：
 
-# 启动前端应用（终端2）
-cd frontend
-npm start
-```
+PORT=5000
+USE_MOCK=true       # 当 Fabric 未就绪时设为 true
+FABRIC_GATEWAY_DISCOVERY=true
+    
 
-### 5. 访问应用
 
-打开浏览器访问：http://localhost:3000
-
-## 🔌 API 接口
-
-| 方法 | 路径 | 描述 |
-|------|------|------|
-| GET | /api/receivables | 获取所有应收账款 |
-| GET | /api/receivables/:id | 获取单个应收账款 |
-| POST | /api/receivables | 创建应收账款 |
-| POST | /api/receivables/:id/confirm | 确权应收账款 |
-| POST | /api/receivables/:id/transfer | 转让应收账款 |
-| POST | /api/receivables/:id/finance | 申请融资 |
-| POST | /api/receivables/:id/approve | 银行审批 |
-| GET | /api/receivables/:id/history | 获取历史记录 |
-
-## 📝 状态说明
-
-| 状态 | 颜色 | 说明 |
-|------|------|------|
-| 未确权 | 橙色 | 供应商已创建，等待采购商确认 |
-| 已确权 | 绿色 | 采购商已确认账款有效 |
-| 已转让 | 蓝色 | 账款已转让给金融机构 |
-| 融资申请中 | 紫色 | 等待银行审批融资申请 |
-| 已融资 | 青色 | 银行已批准融资 |
-| 融资失败 | 红色 | 银行拒绝融资申请 |
-
-## 📄 表单字段
-
-### 创建账款
-- **供应商名称**（必填）：应收账款的收款方
-- **采购商名称**（必填）：应收账款的付款方
-- **金额**（必填）：账款金额
-- **到期日期**（必填）：账款到期日
-- **发票编号**（选填）：对应的发票号码
-- **货物名称**（选填）：交易的货物名称
-
-### 转让操作
-- **新持有人**：账款转让后的持有者
-
-### 融资申请
-- **融资金额**：申请的融资额度
-- **银行名称**：申请融资的银行
-
-## 🔧 开发模式
-
-```bash
-# 后端开发模式（自动重启）
-cd backend
-npm run dev
-
-# 前端开发模式（热更新）
-cd frontend
-npm start
-```
-
-## 📦 生产构建
-
-```bash
-# 构建前端
-cd frontend
-npm run build
-
-# 启动后端生产服务
-cd backend
-npm start
-```
-
-## 📌 注意事项
-
-1. **Fabric网络配置**：默认使用模拟数据，如需连接真实Fabric网络，请配置 `connection.json` 和钱包
-2. **端口冲突**：请确保7050、7051、9051、5984、6984端口未被占用
-3. **CORS配置**：前端已配置代理，开发环境无需额外配置
-
-## 📄 License
-
-MIT License
+🙏 致谢
+Hyperledger Fabric 社区
+React 和 Recharts 团队
+所有小组成员的辛勤付出
+祝你的区块链供应链平台开发顺利！
+如有问题，请提交 GitHub Issue 或联系组长。
