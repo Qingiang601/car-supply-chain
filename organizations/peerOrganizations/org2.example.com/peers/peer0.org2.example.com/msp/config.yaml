@@ -9,6 +9,3 @@ NodeOUs:
   AdminOUIdentifier:
     Certificate: cacerts/ca.org2.example.com-cert.pem
     OrganizationalUnitIdentifier: admin
-  OrdererOUIdentifier:
-    Certificate: cacerts/ca.org2.example.com-cert.pem
-    OrganizationalUnitIdentifier: orderer
